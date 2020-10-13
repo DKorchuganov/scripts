@@ -1,6 +1,7 @@
-import kotlin.system.exitProcess
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.attribute.BasicFileAttributes
+import kotlin.system.exitProcess
 
 
 if (args.size == 0) {
@@ -10,8 +11,11 @@ if (args.size == 0) {
 
 val folder = Paths.get(args[0])
 if (!Files.isDirectory(folder)) {
-  println("This should be an existing folder: ${args[0]}")
+  println("This should be an existing folder: $folder")
   exitProcess(2)
 }
 
-println(args[0])
+Files.list(folder).forEach {
+  val modified = Files.readAttributes(it, BasicFileAttributes::class.java).lastModifiedTime()
+  println("$it $modified")
+}
