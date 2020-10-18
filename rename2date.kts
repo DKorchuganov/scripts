@@ -17,18 +17,23 @@ if (!Files.isDirectory(folder)) {
   exitProcess(2)
 }
 
-val timeShift = if (args.size > 1) {
+val timeShift = if (args.size > 1)
   args[1].toLong()
-} else 0
+else 0
+
+val prefix = if (args.size > 2)
+  args[2]
+else ""
 
 Files.list(folder).forEach {
+  val oldName = it.fileName
   val modified = Files.readAttributes(it, BasicFileAttributes::class.java).lastModifiedTime()
-  val newName = "IMG_" +
+  val newName = prefix +
       modified.toInstant()
           .plusSeconds(timeShift)
           .atZone(ZoneId.systemDefault())
           .toLocalDateTime()
-          .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".jpg"
+          .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "_" + oldName
 
   println("$it $newName $modified")
 }
