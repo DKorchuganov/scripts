@@ -7,7 +7,7 @@ import kotlin.system.exitProcess
 
 
 if (args.size == 0) {
-  println("Usage: rename2date <folder> [<time shift in seconds>]")
+  println("Usage: rename2date <folder> [<time shift in seconds> [<prefix>]]")
   exitProcess(1)
 }
 
@@ -26,14 +26,18 @@ val prefix = if (args.size > 2)
 else ""
 
 Files.list(folder).forEach {
-  val oldName = it.fileName
-  val modified = Files.readAttributes(it, BasicFileAttributes::class.java).lastModifiedTime()
-  val newName = prefix +
-      modified.toInstant()
-          .plusSeconds(timeShift)
-          .atZone(ZoneId.systemDefault())
-          .toLocalDateTime()
-          .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "_" + oldName
+  if (!Files.isDirectory(it)) {
+    val oldName = it.fileName
+    val modified = Files.readAttributes(it, BasicFileAttributes::class.java).lastModifiedTime()
+    val newName = prefix +
+        modified.toInstant()
+            .plusSeconds(timeShift)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "_" + oldName
+    val newPath = folder.resolve(newName)
 
-  println("$it $newName $modified")
+    Files.move(it, newPath)
+    println("$it moved to $newPath")
+  }
 }
